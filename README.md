@@ -6,7 +6,7 @@ The database stores chat messages, each one with an ID and string of message tex
 
 _The home route `/` lists the endpoints in the API. With the Glitch editor open showing the preview on the right, click __Change URL__ and add `messages` to the end to see the first `GET` request._
 
-_Last updated: 10 July 2023_
+_Last updated: 14 August 2023_
 
 ## What's in this project?
 
