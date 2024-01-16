@@ -25,11 +25,7 @@ dbWrapper
     try {
       if (!exists) {
         await db.run(
-          "CREATE TABLE Messages (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT)"
-        );
-        // Add a new column 'user' to the 'Messages' table
-        await db.run(
-          "ALTER TABLE Messages ADD COLUMN user TEXT"
+          "CREATE TABLE Messages (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT, user TEXT)"
         );
         for (let r = 0; r < 5; r++)
           await db.run(
@@ -37,6 +33,7 @@ dbWrapper
             casual.catch_phrase
           );
       }
+
       console.log(await db.all("SELECT * from Messages"));
     } catch (dbError) {
       console.error(dbError);
@@ -63,11 +60,12 @@ module.exports = {
 
 
   // Add new message
-  addMessage: async message => {
+  addMessage: async (message, user) => {
     let success = false;
     try {
-      success = await db.run("INSERT INTO Messages (message) VALUES (?)", [
-        message
+      success = await db.run("INSERT INTO Messages (message, user) VALUES (?, ?)", [
+        message,
+        user
       ]);
     } catch (dbError) {
       console.error(dbError);
@@ -76,12 +74,13 @@ module.exports = {
   },
 
   // Update message text
-  updateMessage: async (id, message) => {
+  updateMessage: async (id, message, user) => {
     let success = false;
     try {
       success = await db.run(
-        "Update Messages SET message = ? WHERE id = ?",
+        "Update Messages SET message = ?, user = ? WHERE id = ?",
         message,
+        user,
         id
       );
     } catch (dbError) {
@@ -91,13 +90,14 @@ module.exports = {
   },
 
   // Remove message
-  deleteMessage: async id => {
+  deleteMessage: async (id, user) => {
     let success = false;
     try {
-      success = await db.run("Delete from Messages WHERE id = ?", id);
+      success = await db.run("Delete from Messages WHERE id = ? AND user = ?", id, user);
     } catch (dbError) {
       console.error(dbError);
     }
     return success.changes > 0 ? true : false;
   }
+
 };
