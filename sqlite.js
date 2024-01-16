@@ -29,9 +29,11 @@ dbWrapper
         );
         for (let r = 0; r < 5; r++)
           await db.run(
-            "INSERT INTO Messages (message) VALUES (?)",
-            casual.catch_phrase
+              "INSERT INTO Messages (message, user) VALUES (?, ?)",
+              casual.catch_phrase,
+              casual.catch_phrase 
           );
+
       }
 
       console.log(await db.all("SELECT * from Messages"));
