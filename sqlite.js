@@ -43,13 +43,19 @@ dbWrapper
 module.exports = {
   
   // Get the messages in the database
-  getMessages: async () => {
+
+  getMessages: async (userId = null) => {
     try {
-      return await db.all("SELECT * from Messages");
+      if (userId) {
+        return await db.all("SELECT * from Messages WHERE user = ?", userId);
+      } else {
+        return await db.all("SELECT * from Messages");
+      }
     } catch (dbError) {
       console.error(dbError);
     }
   },
+
 
   // Add new message
   addMessage: async message => {

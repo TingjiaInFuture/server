@@ -34,12 +34,14 @@ fastify.get("/", (request, reply) => {
 // Return the chat messages from the database helper script - no auth
 fastify.get("/messages", async (request, reply) => {
   let data = {};
-  data.chat = await db.getMessages();
+  const userId = request.query.user;
+  data.chat = await db.getMessages(userId);
   console.log(data.chat);
   if(!data.chat) data.error = errorMessage;
   const status = data.error ? 400 : 200;
   reply.status(status).send(data);
 });
+
 
 // Add new message (auth)
 fastify.post("/message", async (request, reply) => {
