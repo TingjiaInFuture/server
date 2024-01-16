@@ -27,6 +27,10 @@ dbWrapper
         await db.run(
           "CREATE TABLE Messages (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT)"
         );
+        // Add a new column 'user' to the 'Messages' table
+        await db.run(
+          "ALTER TABLE Messages ADD COLUMN user TEXT"
+        );
         for (let r = 0; r < 5; r++)
           await db.run(
             "INSERT INTO Messages (message) VALUES (?)",
@@ -38,6 +42,7 @@ dbWrapper
       console.error(dbError);
     }
   });
+
 
 // Server script calls these methods to connect to the db
 module.exports = {
