@@ -1,12 +1,9 @@
-/**
- * Module handles database management
- *
- * The sample data is for a chat log with one table:
- * Messages: id + message text
- */
-
 const fs = require("fs");
-const dbFile = "./data/chat.db";
+let i = 1; // 添加一个全局变量i
+while(fs.existsSync(`./data/chat${i}.db`)) { // 检查文件是否存在
+    i++; // 如果存在，就递增i
+}
+const dbFile = `./data/chat${i}.db`; // 使用新的文件名
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const dbWrapper = require("sqlite");
@@ -27,7 +24,6 @@ dbWrapper
         await db.run(
           "CREATE TABLE Messages (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT, user TEXT)"
         );
-        for (let r = 0; r < 5; r++)
           await db.run(
               "INSERT INTO Messages (message, user) VALUES (?, ?)",
               casual.catch_phrase,
