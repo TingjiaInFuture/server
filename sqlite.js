@@ -7,7 +7,7 @@ const dbFile = `./data/chat${i}.db`; // 使用新的文件名
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const dbWrapper = require("sqlite");
-const casual = require("casual");
+
 let db;
 
 //SQLite wrapper for async / await connections https://www.npmjs.com/package/sqlite
