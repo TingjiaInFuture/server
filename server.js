@@ -43,47 +43,32 @@ fastify.get("/messages", async (request, reply) => {
 });
 
 
-// Add new message (auth)
+// Add new message
 fastify.post("/message", async (request, reply) => {
   let data = {};
-  const auth = authorized(request.headers.admin_key);
-  if(!auth || !request.body || !request.body.message) data.success = false;
-  else if(auth) data.success = await db.addMessage(request.body.message);
-  const status = data.success ? 201 : auth ? 400 : 401;
+  data.success = await db.addMessage(request.body.message,request.body.user);
+  const status = data.success ? 201 : 400;
+  data.user=request.body.user;
   reply.status(status).send(data);
 });
 
-// Update text for an message (auth)
+// Update text for an message
 fastify.put("/message", async (request, reply) => { 
   let data = {};
-  const auth = authorized(request.headers.admin_key);
-  if(!auth || !request.body || !request.body.id || !request.body.message) data.success = false;
+  if(!request.body || !request.body.id || !request.body.message) data.success = false;
   else data.success = await db.updateMessage(request.body.id, request.body.message); 
-  const status = data.success ? 201 : auth ? 400 : 401;
+  const status = data.success ? 201 : 400;
   reply.status(status).send(data);
 });
 
-// Delete a message (auth)
+// Delete a message
 fastify.delete("/message", async (request, reply) => {
   let data = {};
-  const auth = authorized(request.headers.admin_key);
-  if(!auth || !request.query || !request.query.id) data.success = false;
+  if(!request.query || !request.query.id) data.success = false;
   else data.success = await db.deleteMessage(request.query.id);
-  const status = data.success ? 201 : auth ? 400 : 401;
+  const status = data.success ? 201 : 400;
   reply.status(status).send(data);
 });
-
-// Helper function to authenticate the user key
-const authorized = key => {
-  if (
-    !key ||
-    key < 1 ||
-    !process.env.ADMIN_KEY ||
-    key !== process.env.ADMIN_KEY
-  )
-    return false;
-  else return true;
-};
 
 // Run the server and report out to the logs
 fastify.listen({port:9000, host:'0.0.0.0'}, function(err, address) {
