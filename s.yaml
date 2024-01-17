@@ -11,7 +11,7 @@ services:
       function:
         name: bupt-cs-gallery-hvoq
         description: Initialize
-        runtime: nodejs14.x
+        runtime: nodejs14
         handler: server.handler
         environmentVariables:
           PATH: >-
