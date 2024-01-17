@@ -26,8 +26,8 @@ dbWrapper
         );
           await db.run(
               "INSERT INTO Messages (message, user) VALUES (?, ?)",
-              casual.catch_phrase,
-              casual.catch_phrase 
+              "消息",
+              "用户" 
           );
 
       }
