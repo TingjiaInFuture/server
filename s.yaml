@@ -38,3 +38,6 @@ services:
               - DELETE
               - HEAD
               - PATCH
+package:
+  include:
+    - node_modules/**
