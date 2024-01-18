@@ -34,39 +34,34 @@ fastify.get("/", (request, reply) => {
 // Return the chat messages from the database helper script - no auth
 fastify.get("/messages", async (request, reply) => {
   let data = {};
-  const userId = request.query.user;
-  data.chat = await db.getMessages(userId);
+  const username = request.query.username;
+  data.chat = await db.getMessages(username);
   console.log(data.chat);
   if(!data.chat) data.error = errorMessage;
   const status = data.error ? 400 : 200;
   reply.status(status).send(data);
 });
 
+// User registration
+fastify.post("/register", async (request, reply) => {
+  let data = {};
+  const usernameExists = await db.checkUsername(request.body.username);
+  if (usernameExists) {
+    data.success = false;
+    data.error = "Username is already taken.";
+  } else {
+    data.success = await db.addUser(request.body.username, request.body.password);
+  }
+  const status = data.success ? 201 : 400;
+  reply.status(status).send(data);
+});
 
 // Add new message
 fastify.post("/message", async (request, reply) => {
   let data = {};
-  data.success = await db.addMessage(request.body.message,request.body.user);
+  data.success = await db.addMessage(request.body.message, request.body.username);
   const status = data.success ? 201 : 400;
-  data.user=request.body.user;
-  reply.status(status).send(data);
-});
-
-// Update text for an message
-fastify.put("/message", async (request, reply) => { 
-  let data = {};
-  if(!request.body || !request.body.id || !request.body.message) data.success = false;
-  else data.success = await db.updateMessage(request.body.id, request.body.message); 
-  const status = data.success ? 201 : 400;
-  reply.status(status).send(data);
-});
-
-// Delete a message
-fastify.delete("/message", async (request, reply) => {
-  let data = {};
-  if(!request.query || !request.query.id) data.success = false;
-  else data.success = await db.deleteMessage(request.query.id);
-  const status = data.success ? 201 : 400;
+  data.username = request.body.username;
   reply.status(status).send(data);
 });
 
@@ -78,4 +73,3 @@ fastify.listen({port:9000, host:'0.0.0.0'}, function(err, address) {
   }
   console.log(`Your app is listening on ${address}`);
 });
-
