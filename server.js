@@ -39,6 +39,10 @@ fastify.get("/messages", async (request, reply) => {
   console.log(data.chat);
   if(!data.chat) data.error = errorMessage;
   const status = data.error ? 400 : 200;
+  console.log("user:");
+  console.log(username);
+  console.log("data:");
+  console.log(data);
   reply.status(status).send(data);
 });
 
@@ -56,12 +60,25 @@ fastify.post("/register", async (request, reply) => {
   reply.status(status).send(data);
 });
 
+// User login
+fastify.post("/login", async (request, reply) => {
+  let data = {};
+  data.userId = await db.login(request.body.username, request.body.password);
+  if (!data.userId) {
+    data.error = "Invalid username or password.";
+  }
+  const status = data.userId ? 200 : 400;
+  reply.status(status).send(data);
+});
+
+
+
 // Add new message
 fastify.post("/message", async (request, reply) => {
   let data = {};
-  data.success = await db.addMessage(request.body.message, request.body.username);
+  data.success = await db.addMessage(request.body.message, request.body.senderUsername, request.body.receiverUsername);
   const status = data.success ? 201 : 400;
-  data.username = request.body.username;
+  data.username = request.body.senderUsername;
   reply.status(status).send(data);
 });
 
