@@ -1,7 +1,7 @@
 {
-  "name": "glitch-blank-sqlite",
-  "version": "0.2.0",
-  "description": "A Node app with SQLite database, instantly up and running.",
+  "name": "server",
+  "version": "0.0.1",
+  "description": "The database for milin app",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -17,12 +17,11 @@
     "node": "14.x"
   },
   "repository": {
-    "url": "https://glitch.com/edit/#!/glitch-blank-sqlite"
+    "url": "https://github.com/TingjiaInFuture/server"
   },
   "license": "MIT",
   "keywords": [
     "node",
-    "glitch",
     "sqlite"
   ]
 }
