@@ -13,19 +13,19 @@ fastify.register(require("@fastify/formbody"));
 
 const db = require("./sqlite.js");
 const errorMessage =
-  "Whoops! Error connecting to the database–please try again!";
+  "Error connecting to the database!";
 
-// OnRoute hook to list endpoints
+
 const routes = { endpoints: [] };
 fastify.addHook("onRoute", routeOptions => {
   routes.endpoints.push(routeOptions.method + " " + routeOptions.path);
 });
 
-// Just send some info at the home route
+
 fastify.get("/", (request, reply) => {
   const data = {
-    title: "Hello SQLite (blank)",
-    intro: "This is a database-backed API with the following endpoints",
+    title: "Milin Server API",
+    intro: "A database-backed API with the following endpoints",
     routes: routes.endpoints
   };
   reply.status(200).send(data);
@@ -57,6 +57,19 @@ fastify.post("/register", async (request, reply) => {
     data.success = await db.addUser(request.body.username, request.body.password);
   }
   const status = data.success ? 201 : 400;
+  reply.status(status).send(data);
+});
+
+
+fastify.get("/checkUsername", async (request, reply) => {
+  let data = {};
+  const userId = await db.checkUsername(request.query.username);
+  if (userId) {
+    data.userId = userId;
+  } else {
+    data.error = "Username does not exist.";
+  }
+  const status = data.userId ? 200 : 400;
   reply.status(status).send(data);
 });
 

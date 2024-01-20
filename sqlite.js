@@ -34,14 +34,14 @@ dbWrapper
 
 // Check if a username is already taken
 const checkUsername = async (username) => {
-  let exists = false;
+  let userId = 0;
   try {
     const user = await db.get("SELECT * FROM Users WHERE username = ?", username);
-    exists = user ? true : false;
+    userId = user ? user.id : 0;
   } catch (dbError) {
     console.error(dbError);
   }
-  return exists;
+  return userId;
 };
 
 module.exports = {
@@ -52,8 +52,8 @@ module.exports = {
     let userId = 0;
     try {
       // 检查用户名是否已存在
-      const usernameExists = await checkUsername(username);
-      if (!usernameExists) {
+      userId = await checkUsername(username);
+      if (!userId) {
         const result = await db.run("INSERT INTO Users (username, password) VALUES (?, ?)", [
           username,
           password
@@ -69,6 +69,8 @@ module.exports = {
     }
     return userId;
   },
+
+
 
 
 
