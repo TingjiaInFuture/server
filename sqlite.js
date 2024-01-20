@@ -133,7 +133,8 @@ module.exports = {
   // 获取所有的类别
   getCategories: async () => {
     try {
-      return await db.all("SELECT * FROM Categories");
+      const categories = await db.all("SELECT * FROM Categories");
+      return categories.map(category => category.category);
     } catch (dbError) {
       console.error(dbError);
     }
