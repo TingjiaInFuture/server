@@ -106,12 +106,14 @@ fastify.listen({port:9000, host:'0.0.0.0'}, function(err, address) {
 
 // 获取所有的类别
 fastify.get("/categories", async (request, reply) => {
-  let data = {};
-  data.categories = await db.getCategories();
-  if(!data.categories) data.error = errorMessage;
-  const status = data.error ? 400 : 200;
-  reply.status(status).send(data);
+  const categories = await db.getCategories();
+  if(!categories) {
+    reply.status(400).send(errorMessage);
+  } else {
+    reply.status(200).send(categories);
+  }
 });
+
 
 // 添加新的类别
 fastify.post("/categories", async (request, reply) => {
