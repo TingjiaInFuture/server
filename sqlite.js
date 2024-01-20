@@ -23,6 +23,9 @@ dbWrapper
         await db.run(
           "CREATE TABLE Messages (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT, senderId INTEGER, receiverId INTEGER, FOREIGN KEY(senderId) REFERENCES Users(id), FOREIGN KEY(receiverId) REFERENCES Users(id))"
         );
+        await db.run(
+          "CREATE TABLE Categories (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT)"
+        );
       }
 
 
@@ -124,5 +127,29 @@ module.exports = {
       console.error(dbError);
     }
   },
+
+
+
+  // 获取所有的类别
+  getCategories: async () => {
+    try {
+      return await db.all("SELECT * FROM Categories");
+    } catch (dbError) {
+      console.error(dbError);
+    }
+  },
+
+  // 添加新的类别
+  addCategory: async (category) => {
+    let success = false;
+    try {
+      const result = await db.run("INSERT INTO Categories (category) VALUES (?)", category);
+      success = result.changes > 0;
+    } catch (dbError) {
+      console.error(dbError);
+    }
+    return success;
+  },
+
 
 };
