@@ -4,6 +4,20 @@ const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const dbWrapper = require("sqlite");
 
+// const crypto = require('crypto');
+// // 生成随机的盐
+// const salt = crypto.randomBytes(16).toString('hex');
+// // 使用 pbkdf2Sync 函数对密码进行加密
+// const hash = crypto.pbkdf2Sync('password', salt, 1000, 64, 'sha512').toString('hex');
+// // 保存盐和 hash 值，盐的存储需要密匙保护
+
+// //待解密的密码
+// const encryptedPassword = 'password';
+// // 使用 pbkdf2Sync 函数对密码进行解密
+// const originalPassword = crypto.pbkdf2Sync(encryptedPassword, salt, 1000, 64, digest).toString('hex');
+
+
+
 let db;
 
 //SQLite wrapper for async / await connections https://www.npmjs.com/package/sqlite
