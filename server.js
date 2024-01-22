@@ -122,3 +122,21 @@ fastify.post("/categories", async (request, reply) => {
   const status = data.success ? 201 : 400;
   reply.status(status).send(data);
 });
+
+  // 添加新的子类
+  fastify.post("/subcategories", async (request, reply) => {
+    let data = {};
+    data.success = await db.addSubcategory(request.body.category,request.body.user);
+    const status = data.success ? 201 : 400;
+    reply.status(status).send(data);
+  });
+
+  // 获取给定主类的子类
+  fastify.get("/subcategories", async (request, reply) => {
+    const subcategories = await db.getSubcategories(request.query.category);
+    if(!subcategories) {
+      reply.status(400).send(errorMessage);
+    } else {
+      reply.status(200).send(subcategories);
+    }
+  });

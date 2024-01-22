@@ -40,6 +40,9 @@ dbWrapper
         await db.run(
           "CREATE TABLE Categories (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT)"
         );
+        await db.run(
+          "CREATE TABLE Subcategories (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT, user TEXT)"
+        );//不能使用并查集实现父子类，子类的父类是不确定的，所以只能使用两个表来实现
       }
 
 
@@ -166,5 +169,26 @@ module.exports = {
     return success;
   },
 
+  // 添加新的子类
+  addSubcategory: async (category, user) => {
+    let success = false;
+    try {
+      const result = await db.run("INSERT INTO Subcategories (category, user) VALUES (?, ?)", category, user);
+      success = result.changes > 0;
+    } catch (dbError) {
+      console.error(dbError);
+    }
+    return success;
+  },
+
+  // 获取给定主类的子类
+  getSubcategories: async (category) => {
+    try {
+      const subcategories = await db.all("SELECT * FROM Subcategories WHERE category = ?", category);
+      return subcategories.map(subcategory => subcategory.user);
+    } catch (dbError) {
+      console.error(dbError);
+    }
+  },
 
 };
