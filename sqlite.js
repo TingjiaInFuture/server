@@ -1,5 +1,5 @@
 const fs = require("fs");
-const dbFile = `./data/milin.db`; 
+const dbFile = `/home/data/milin.db`; 
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const dbWrapper = require("sqlite");
