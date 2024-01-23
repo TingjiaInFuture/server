@@ -1,5 +1,5 @@
 const fs = require("fs");
-const dbFile = `/home/data/milin.db`; 
+const dbFile = `/home/data/milin.db`;
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const dbWrapper = require("sqlite");
@@ -169,6 +169,22 @@ module.exports = {
     return success;
   },
 
+
+  // 删除给定的主类
+  delCategory: async (category) => {
+    let success = false;
+    try {
+      const result = await db.run("DELETE FROM Categories WHERE category = ?", category);
+      success = result.changes > 0;
+    } catch (dbError) {
+      console.error(dbError);
+    }
+    return success;
+  },
+
+
+
+
   // 添加新的子类
   addSubcategory: async (category, user) => {
     let success = false;
@@ -190,5 +206,18 @@ module.exports = {
       console.error(dbError);
     }
   },
+
+  // 删除给定主类下的一个子类
+  delSubcategory: async (category, user) => {
+    let success = false;
+    try {
+      const result = await db.run("DELETE FROM Subcategories WHERE category = ? AND user = ?", category, user);
+      success = result.changes > 0;
+    } catch (dbError) {
+      console.error(dbError);
+    }
+    return success;
+  },
+
 
 };

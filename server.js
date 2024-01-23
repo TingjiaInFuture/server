@@ -37,7 +37,7 @@ fastify.get("/messages", async (request, reply) => {
   const username = request.query.username;
   data.chat = await db.getMessages(username);
   console.log(data.chat);
-  if(!data.chat) data.error = errorMessage;
+  if (!data.chat) data.error = errorMessage;
   const status = data.error ? 400 : 200;
   console.log("user:");
   console.log(username);
@@ -96,7 +96,7 @@ fastify.post("/message", async (request, reply) => {
 });
 
 // Run the server and report out to the logs
-fastify.listen({port:9000, host:'0.0.0.0'}, function(err, address) {
+fastify.listen({ port: 9000, host: '0.0.0.0' }, function (err, address) {
   if (err) {
     console.error(err);
     process.exit(1);
@@ -107,7 +107,7 @@ fastify.listen({port:9000, host:'0.0.0.0'}, function(err, address) {
 // 获取所有的类别
 fastify.get("/categories", async (request, reply) => {
   const categories = await db.getCategories();
-  if(!categories) {
+  if (!categories) {
     reply.status(400).send(errorMessage);
   } else {
     reply.status(200).send(categories);
@@ -123,20 +123,36 @@ fastify.post("/categories", async (request, reply) => {
   reply.status(status).send(data);
 });
 
-  // 添加新的子类
-  fastify.post("/subcategories", async (request, reply) => {
-    let data = {};
-    data.success = await db.addSubcategory(request.body.category,request.body.user);
-    const status = data.success ? 201 : 400;
-    reply.status(status).send(data);
-  });
+fastify.delete("/categories", async (request, reply) => {
+  let data = {};
+  data.success = await db.delCategory(request.body.category);
+  const status = data.success ? 200 : 400;
+  reply.status(status).send(data);
+});
 
-  // 获取给定主类的子类
-  fastify.get("/subcategories", async (request, reply) => {
-    const subcategories = await db.getSubcategories(request.query.category);
-    if(!subcategories) {
-      reply.status(400).send(errorMessage);
-    } else {
-      reply.status(200).send(subcategories);
-    }
-  });
+
+
+// 添加新的子类
+fastify.post("/subcategories", async (request, reply) => {
+  let data = {};
+  data.success = await db.addSubcategory(request.body.category, request.body.user);
+  const status = data.success ? 201 : 400;
+  reply.status(status).send(data);
+});
+
+// 获取给定主类的子类
+fastify.get("/subcategories", async (request, reply) => {
+  const subcategories = await db.getSubcategories(request.query.category);
+  if (!subcategories) {
+    reply.status(400).send(errorMessage);
+  } else {
+    reply.status(200).send(subcategories);
+  }
+});
+
+fastify.delete("/subcategories", async (request, reply) => {
+  let data = {};
+  data.success = await db.delSubcategory(request.body.category, request.body.user);
+  const status = data.success ? 200 : 400;
+  reply.status(status).send(data);
+});
