@@ -43,6 +43,11 @@ dbWrapper
         await db.run(
           "CREATE TABLE Subcategories (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT, user TEXT)"
         );//不能使用并查集实现父子类，子类的父类是不确定的，所以只能使用两个表来实现
+        await db.run(
+          "CREATE TABLE Bottles (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT)"
+        );
+
+
       }
 
 
@@ -218,6 +223,37 @@ module.exports = {
     }
     return success;
   },
+
+  // 扔出漂流瓶
+  addBottle: async (message) => {
+    let bottleId = 0;
+    try {
+      const result = await db.run("INSERT INTO Bottles (message) VALUES (?)", message);
+      if (result.changes > 0) {
+        const bottle = await db.get("SELECT last_insert_rowid() as id");
+        bottleId = bottle.id;
+      }
+    } catch (dbError) {
+      console.error(dbError);
+    }
+    return bottleId;
+  },
+
+  // 捡到漂流瓶
+  pickBottle: async () => {
+    let bottle = null;
+    try {
+      const bottles = await db.all("SELECT * FROM Bottles");
+      const randomIndex = Math.floor(Math.random() * bottles.length);
+      bottle = bottles[randomIndex];
+    } catch (dbError) {
+      console.error(dbError);
+    }
+    return bottle;
+  }
+
+
+
 
 
 };

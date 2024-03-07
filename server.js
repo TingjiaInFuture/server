@@ -156,3 +156,19 @@ fastify.delete("/subcategories", async (request, reply) => {
   const status = data.success ? 200 : 400;
   reply.status(status).send(data);
 });
+
+// 添加漂流瓶
+fastify.post("/bottle", async (request, reply) => {
+  let data = {};
+  data.success = await db.addBottle(request.body.message);
+  const status = data.success ? 201 : 400;
+  reply.status(status).send(data);
+});
+
+// 获取漂流瓶
+fastify.get("/bottle", async (request, reply) => {
+  let bottle = {};
+  bottle = await db.pickBottle();
+  const status = bottle ? 200 : 400;
+  reply.status(status).send(bottle);
+});
