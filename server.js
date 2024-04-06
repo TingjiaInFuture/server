@@ -9,6 +9,13 @@ const fastify = require("fastify")({
   logger: false
 });
 
+const cors = require('@fastify/cors');
+fastify.register(cors, {
+  origin: true,
+  credentials: true
+});
+
+
 fastify.register(require("@fastify/formbody"));
 
 const db = require("./sqlite.js");
@@ -83,6 +90,65 @@ fastify.post("/login", async (request, reply) => {
   const status = data.userId ? 200 : 400;
   reply.status(status).send(data);
 });
+
+
+
+// Upload avatar
+fastify.post("/uploadAvatar", async (request, reply) => {
+  let data = {};
+  try {
+    await db.uploadAvatar(request.body.userId, request.body.avatar);
+    data.success = true;
+  } catch (error) {
+    data.error = "Error uploading avatar.";
+  }
+  const status = data.success ? 200 : 400;
+  reply.status(status).send(data);
+});
+
+// Get avatar
+fastify.get("/getAvatar", async (request, reply) => {
+  let data = {};
+  try {
+    data.avatar = await db.getAvatar(request.query.userId);
+    if (!data.avatar) {
+      data.error = "Error getting avatar.";
+    }
+  } catch (error) {
+    data.error = "Error getting avatar.";
+  }
+  const status = data.avatar ? 200 : 400;
+  reply.status(status).send(data);
+});
+
+// Add experience
+fastify.post("/addExperience", async (request, reply) => {
+  let data = {};
+  try {
+    await db.addExperience(request.body.userId, request.body.experience);
+    data.success = true;
+  } catch (error) {
+    data.error = "Error adding experience.";
+  }
+  const status = data.success ? 200 : 400;
+  reply.status(status).send(data);
+});
+
+// Get experience
+fastify.get("/getExperience", async (request, reply) => {
+  let data = {};
+  try {
+    data.experience = await db.getExperience(request.query.userId);
+    if (data.experience === undefined) {
+      data.error = "Error getting experience.";
+    }
+  } catch (error) {
+    data.error = "Error getting experience.";
+  }
+  const status = data.experience !== undefined ? 200 : 400;
+  reply.status(status).send(data);
+});
+
 
 
 
@@ -171,4 +237,83 @@ fastify.get("/bottle", async (request, reply) => {
   bottle = await db.pickBottle();
   const status = bottle ? 200 : 400;
   reply.status(status).send(bottle);
+});
+
+//以下部分为web端API
+
+// 搜索消息
+fastify.get("/searchMessage", async (request, reply) => {
+  let data = {};
+  data.messages = await db.searchMessage(request.query.word);
+  if (!data.messages) {
+    data.error = errorMessage;
+  }
+  const status = data.error ? 400 : 200;
+  reply.status(status).send(data);
+});
+
+// 添加新问题
+fastify.post("/addQuestion", async (request, reply) => {
+  let data = {};
+  data.success = await db.addQuestion(request.body.sender, request.body.question, request.body.degree);
+  const status = data.success ? 201 : 400;
+  reply.status(status).send(data);
+});
+
+// 获取/更新/删除问题
+fastify.post("/handleQuestion", async (request, reply) => {
+  let data = {};
+  if (request.body.method === 'GET') {
+    data.question = await db.handleQuestion('GET', request.body.question);
+  } else if (request.body.method === 'POST') {
+    data.success = await db.handleQuestion('POST', request.body.question, request.body.solution, request.body.solver);
+  } else if (request.body.method === 'DELETE') {
+    data.success = await db.handleQuestion('DELETE', request.body.question);
+  }
+  if (!data.question && !data.success) {
+    data.error = errorMessage;
+  }
+  const status = data.error ? 400 : 200;
+  reply.status(status).send(data);
+});
+
+// 获取反馈
+fastify.get("/getFeedback", async (request, reply) => {
+  let data = {};
+  data.feedback = await db.getFeedback(request.query.solution, request.query.sender);
+  if (!data.feedback) {
+    data.error = errorMessage;
+  }
+  const status = data.error ? 400 : 200;
+  reply.status(status).send(data);
+});
+
+// 搜索密语
+fastify.get("/searchSecret", async (request, reply) => {
+  let data = {};
+  data.secret = await db.searchSecret(request.query.seek);
+  if (!data.secret) {
+    data.error = errorMessage;
+  }
+  const status = data.error ? 400 : 200;
+  reply.status(status).send(data);
+});
+
+// 添加留言
+fastify.post("/addMessageToWall", async (request, reply) => {
+  let data = {};
+  data.success = await db.addMessageToWall(request.body.userName, request.body.time, request.body.text);
+  const status = data.success ? 201 : 400;
+  reply.status(status).send(data);
+});
+
+// 获取所有留言
+fastify.get("/wall", async (request, reply) => {
+  let data = {};
+  data.messages = await db.getAllMessagesFromWall();
+  if (!data.messages) {
+    data.error = errorMessage;
+  }
+  const status = data.error ? 400 : 200;
+  reply.status(status).send(data);
 });

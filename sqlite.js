@@ -1,5 +1,5 @@
 const fs = require("fs");
-const dbFile = `/home/data/milin.db`;
+const dbFile = `data/milin.db`;
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const dbWrapper = require("sqlite");
@@ -32,7 +32,7 @@ dbWrapper
     try {
       if (!exists) {
         await db.run(
-          "CREATE TABLE Users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)"
+          "CREATE TABLE Users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, avatar BLOB DEFAULT NULL, experience INTEGER DEFAULT 0)"
         );
         await db.run(
           "CREATE TABLE Messages (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT, senderId INTEGER, receiverId INTEGER, FOREIGN KEY(senderId) REFERENCES Users(id), FOREIGN KEY(receiverId) REFERENCES Users(id))"
@@ -46,6 +46,22 @@ dbWrapper
         await db.run(
           "CREATE TABLE Bottles (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT)"
         );
+        //以下为web端
+        // 问题表
+        await db.run(
+          "CREATE TABLE Questions (id INTEGER PRIMARY KEY AUTOINCREMENT, sender TEXT, question TEXT, degree INTEGER, solution TEXT, solver TEXT)"
+        );
+
+        // 密语表
+        await db.run(
+          "CREATE TABLE Secrets (id INTEGER PRIMARY KEY AUTOINCREMENT, secret TEXT)"
+        );
+
+        // 留言墙表
+        await db.run(
+          "CREATE TABLE Walls (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, time TEXT, text TEXT)"
+        );
+
 
 
       }
@@ -112,6 +128,58 @@ module.exports = {
     }
     return userId;
   },
+
+
+
+  // Upload avatar
+  uploadAvatar: async (userId, avatar) => {
+    try {
+      await db.run("UPDATE Users SET avatar = ? WHERE id = ?", [avatar, userId]);
+    } catch (dbError) {
+      console.error(dbError);
+    }
+  },
+
+  // Get avatar
+  getAvatar: async (userId) => {
+    let avatar = null;
+    try {
+      const user = await db.get("SELECT avatar FROM Users WHERE id = ?", userId);
+      if (user) {
+        avatar = user.avatar;
+      }
+    } catch (dbError) {
+      console.error(dbError);
+    }
+    return avatar;
+  },
+
+  // Add experience
+  addExperience: async (userId, experience) => {
+    try {
+      await db.run("UPDATE Users SET experience = experience + ? WHERE id = ?", [experience, userId]);
+    } catch (dbError) {
+      console.error(dbError);
+    }
+  },
+
+  // Get experience
+  getExperience: async (userId) => {
+    let experience = 0;
+    try {
+      const user = await db.get("SELECT experience FROM Users WHERE id = ?", userId);
+      if (user) {
+        experience = user.experience;
+      }
+    } catch (dbError) {
+      console.error(dbError);
+    }
+    return experience;
+  },
+
+
+
+
 
 
 
@@ -250,10 +318,77 @@ module.exports = {
       console.error(dbError);
     }
     return bottle;
+  },
+
+  //以下为web端API
+  // 搜索消息
+  searchMessage: async (word) => {
+    try {
+      return await db.get(`SELECT * FROM Messages WHERE message LIKE ?`, `%${word}%`);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  // 添加新问题
+  addQuestion: async (sender, question, degree) => {
+    try {
+      return await db.run(`INSERT INTO Questions (sender, question, degree) VALUES (?, ?, ?)`, [sender, question, degree]);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  // 获取/更新/删除问题
+  handleQuestion: async (method, question, solution, solver) => {
+    try {
+      if (method === 'GET') {
+        return await db.get(`SELECT * FROM Questions WHERE question = ?`, question);
+      } else if (method === 'POST') {
+        return await db.run(`UPDATE Questions SET solution = ?, solver = ? WHERE question = ?`, [solution, solver, question]);
+      } else if (method === 'DELETE') {
+        return await db.run(`DELETE FROM Questions WHERE question = ?`, question);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  // 获取反馈
+  getFeedback: async (solution, sender) => {
+    try {
+      return await db.get(`SELECT * FROM Questions WHERE solution = ? AND sender = ?`, [solution, sender]);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  // 搜索密语
+  searchSecret: async (seek) => {
+    try {
+      return await db.get(`SELECT * FROM Secrets WHERE secret = ?`, seek);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  // 添加留言
+  addMessageToWall: async (userName, time, text) => {
+    try {
+      return await db.run(`INSERT INTO Walls (userName, time, text) VALUES (?, ?, ?)`, [userName, time, text]);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  // 获取所有留言
+  getAllMessagesFromWall: async () => {
+    try {
+      return await db.all(`SELECT * FROM Walls`);
+    } catch (error) {
+      console.error(error);
+    }
   }
-
-
-
 
 
 };
