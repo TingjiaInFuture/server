@@ -61,7 +61,13 @@ fastify.post("/register", async (request, reply) => {
     data.success = false;
     data.error = "Username is already taken.";
   } else {
-    data.success = await db.addUser(request.body.username, request.body.password);
+    const userId = await db.addUser(request.body.username, request.body.password);
+    if (userId) {
+      data.success = true;
+      data.userId = userId;  //如果不返回userId但前端按userId判断则会注册成功却提示失败
+    } else {
+      data.success = false;
+    }
   }
   const status = data.success ? 201 : 400;
   reply.status(status).send(data);
