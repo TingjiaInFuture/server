@@ -1,5 +1,6 @@
 const fs = require("fs");
-const dbFile = `/home/data/milin.db`;
+const { get } = require("http");
+const dbFile = `data/milin.db`;
 const exists = fs.existsSync(dbFile);
 const sqlite3 = require("sqlite3").verbose();
 const dbWrapper = require("sqlite");
@@ -38,6 +39,9 @@ dbWrapper
           "CREATE TABLE Messages (id INTEGER PRIMARY KEY AUTOINCREMENT, message TEXT, senderId INTEGER, receiverId INTEGER, FOREIGN KEY(senderId) REFERENCES Users(id), FOREIGN KEY(receiverId) REFERENCES Users(id))"
         );
         await db.run(
+          "CREATE TABLE Groups (id INTEGER PRIMARY KEY AUTOINCREMENT, userId INTEGER, FOREIGN KEY(userId) REFERENCES Users(id))"
+        );
+        await db.run(
           "CREATE TABLE Categories (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT)"
         );
         await db.run(
@@ -60,6 +64,11 @@ dbWrapper
         // 留言墙表
         await db.run(
           "CREATE TABLE Walls (id INTEGER PRIMARY KEY AUTOINCREMENT, userName TEXT, time TEXT, text TEXT)"
+        );
+
+        //多人续写故事
+        await db.run(
+          "CREATE TABLE Stories (id INTEGER PRIMARY KEY AUTOINCREMENT, story TEXT)"
         );
 
 
@@ -85,9 +94,46 @@ const checkUsername = async (username) => {
   return userId;
 };
 
+// Get all groups
+const getGroups = async () => {
+  let groups = [];
+  try {
+    groups = await db.all("SELECT Groups.id, Users.username FROM Groups JOIN Users ON Groups.userId = Users.id");
+  } catch (dbError) {
+    console.error(dbError);
+  }
+  return groups;
+};
+
+// Add a group
+const addGroup = async (userId) => {
+  let success = false;
+  try {
+    const result = await db.run("INSERT INTO Groups (userId) VALUES (?)", userId);
+    success = result.changes > 0;
+  } catch (dbError) {
+    console.error(dbError);
+  }
+  return success;
+};
+
+// Delete a group
+const delGroup = async (groupId) => {
+  let success = false;
+  try {
+    const result = await db.run("DELETE FROM Groups WHERE id = ?", groupId);
+    success = result.changes > 0;
+  } catch (dbError) {
+    console.error(dbError);
+  }
+  return success;
+};
+
 module.exports = {
   checkUsername,
-
+  getGroups,
+  addGroup,
+  delGroup,
   // Add new user
   addUser: async (username, password) => {
     let userId = 0;
@@ -385,6 +431,42 @@ module.exports = {
   getAllMessagesFromWall: async () => {
     try {
       return await db.all(`SELECT * FROM Walls`);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  getStory: async (ID) => {
+
+    try {
+      return await db.get(`SELECT * FROM Stories WHERE id = ?`, ID);
+    } catch (error) {
+      console.error(error);
+    }
+
+  },
+
+
+
+
+  // 添加故事
+  addStory: async (text) => {
+    let storyId = 0;
+    try {
+      const result = await db.run("INSERT INTO stories (text) VALUES (?)", text);
+      if (result.changes > 0) {
+        const story = await db.get("SELECT last_insert_rowid() as id");
+        storyId = story.id;
+      }
+    } catch (dbError) {
+      console.error(dbError);
+    }
+    return storyId;
+  },
+
+  updateStory: async (ID, story) => {
+    try {
+      return await db.run(`UPDATE Stories SET story = ? WHERE id = ?`, [story, ID]);
     } catch (error) {
       console.error(error);
     }

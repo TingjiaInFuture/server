@@ -1,6 +1,6 @@
 {
   "name": "server",
-  "version": "1.6.1",
+  "version": "1.7",
   "description": "The database for milin app",
   "main": "server.js",
   "scripts": {

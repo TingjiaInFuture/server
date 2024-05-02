@@ -6,7 +6,7 @@
 
 const fastify = require("fastify")({
   // Set this to true for detailed logging:
-  logger: false
+  logger: true
 });
 
 const cors = require('@fastify/cors');
@@ -72,7 +72,6 @@ fastify.post("/register", async (request, reply) => {
   const status = data.success ? 201 : 400;
   reply.status(status).send(data);
 });
-
 
 fastify.get("/checkUsername", async (request, reply) => {
   let data = {};
@@ -322,4 +321,63 @@ fastify.get("/wall", async (request, reply) => {
   }
   const status = data.error ? 400 : 200;
   reply.status(status).send(data);
+});
+
+// Get groups
+fastify.get("/getGroups", async (request, reply) => {
+  let data = {};
+  data.groups = await db.getGroups();
+  if (!data.groups) data.error = errorMessage;
+  const status = data.error ? 400 : 200;
+  reply.status(status).send(data);
+});
+
+// Add group
+fastify.post("/addGroup", async (request, reply) => {
+  let data = {};
+  data.success = await db.addGroup(request.body.userId);
+  const status = data.success ? 201 : 400;
+  reply.status(status).send(data);
+});
+
+// Delete group
+fastify.delete("/delGroup", async (request, reply) => {
+  let data = {};
+  data.success = await db.delGroup(request.body.groupId);
+  const status = data.success ? 200 : 400;
+  reply.status(status).send(data);
+});
+
+// 获取故事
+fastify.get("/story", async (request, reply) => {
+  const storyId = request.query.id;
+  const story = await db.getStory(storyId);
+  if (!story) {
+    reply.status(400).send("Error getting story.");
+  } else {
+    reply.status(200).send(story);
+  }
+});
+
+// 添加故事
+fastify.post("/story", async (request, reply) => {
+  const text = request.body.text;
+  const storyId = await db.addStory(text);
+  if (!storyId) {
+    reply.status(400).send("Error adding story.");
+  } else {
+    reply.status(201).send({ id: storyId });
+  }
+});
+
+// 更新故事
+fastify.put("/story", async (request, reply) => {
+  const storyId = request.body.id;
+  const story = request.body.story;
+  const result = await db.updateStory(storyId, story);
+  if (!result || result.changes === 0) {
+    reply.status(400).send("Error updating story.");
+  } else {
+    reply.status(200).send({ id: storyId });
+  }
 });
