@@ -6,7 +6,7 @@
 
 const fastify = require("fastify")({
   // Set this to true for detailed logging:
-  logger: true
+  logger: false
 });
 
 const cors = require('@fastify/cors');
